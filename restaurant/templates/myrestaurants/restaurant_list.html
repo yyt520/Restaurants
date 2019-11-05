@@ -1,0 +1,22 @@
+{% extends "myrestaurants/base.html" %}
+
+{% block content %}
+    <h3>餐厅列表</h3>
+
+    <ul>
+        {% for restaurant in latest_restaurant_list %}
+            <li><a href="{% url 'myrestaurants:restaurant_detail' restaurant.id %}">
+                {{ restaurant.name }}</a></li>
+        {% empty %}
+            <li>对不起，没有餐厅点评。</li>
+        {% endfor %}
+    </ul>
+
+    {% if request.user.is_authenticated %}
+        <p><span class="glyphicon glyphicon-plus"></span> <a href="{% url 'myrestaurants:restaurant_create' %}">添加餐厅</a>
+        </p>
+    {% else %}
+
+        <p>请<a href="{% url 'users:login' %}?next={% url 'myrestaurants:restaurant_create' %}">登录</a>后添加餐厅。</p>
+    {% endif %}
+{% endblock %}

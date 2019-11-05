@@ -1,0 +1,66 @@
+{% extends "myrestaurants/base.html" %}
+
+{% block content %}
+    <h3>
+        {{ restaurant.name }}
+        {% if request.user == restaurant.user %}
+            (<a href="{% url 'myrestaurants:restaurant_edit' restaurant.id %}">修改</a>)
+        {% endif %}
+    </h3>
+
+    <h4>地址</h4>
+
+    <p>
+        {{ restaurant.address }}, <br/>
+        {{ restaurant.telephone }}
+    </p>
+
+    <h4>菜单
+        {% if request.user.is_authenticated %}
+            (<a href="{% url 'myrestaurants:dish_create' restaurant.id %}">添加</a>)
+        {% endif %}
+    </h4>
+
+    <ul>
+        {% for dish in restaurant.dishes.all %}
+            <li><a href="{% url 'myrestaurants:dish_detail' restaurant.id dish.id %}">
+                {{ dish.name }}</a> - {{ dish.price }}元
+            </li>
+        {% empty %}
+            <li>对不起，该餐厅还没有菜肴。</li>
+        {% endfor %}
+    </ul>
+
+    <h4>用户点评</h4>
+    {% if restaurant.reviews.all %}
+        {% for review in restaurant.reviews.all %}
+
+            <p>{{ review.rating }}星, {{ review.user }}点评, {{ review.date | date:"Y-m-d" }}</p>
+            <p>{{ review.comment }}</p>
+
+        {% endfor %}
+
+    {% else %}
+        <p>目前还没有用户点评。</p>{% endif %}
+
+    <h4>添加点评</h4>
+    {% if request.user.is_authenticated %}
+        <form action="{% url 'myrestaurants:review_create' restaurant.id %}" method="post">
+            {% csrf_token %}
+            <p>评论</p>
+            <textarea name="comment" id="comment"></textarea>
+            <p>评分</p>
+            <p>
+                {% for rate in RATING_CHOICES %}
+                    <input type="radio" name="rating" id="rating{{ forloop.counter }}" value="{{ rate.0 }}"/>
+                    <label for="choice{{ forloop.counter }}">{{ rate.0 }}星</label>
+                    <br/>
+                {% endfor %}
+            </p>
+            <input type="submit" value="提交"/>
+        </form>
+    {% else %}
+        <p>请先<a href="{% url 'users:login' %}?next={% firstof request.path '/' %}">登录</a>再评论。</p>
+    {% endif %}
+
+{% endblock %}
